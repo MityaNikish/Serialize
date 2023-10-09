@@ -3,6 +3,8 @@
 #include <iostream>
 #include <sstream>
 #include "serialize.hpp"
+#include <unordered_map>
+
 
 //int main()
 //{
@@ -38,27 +40,29 @@
 
 TEST(Vector, Int) {
     const std::vector<int> writable_vector = { 1, 2, 3, 4, 5, 6 };
-	std::vector<int> readable_vector;
+    std::vector<int> readable_vector;
     std::stringstream ss;
 
     ASSERT_NO_THROW({ serialize(writable_vector, ss); });
 
+    ss >> std::noskipws;
     ASSERT_NO_THROW({ deserialize(readable_vector, ss); });
 
     EXPECT_EQ(writable_vector, readable_vector);
 }
 
-//TEST(Vector, Double) {
-//    const std::vector<double> writable_vector = { 1.1, 2.2, 3.3, 4.4, 5.5, 6.6 };
-//    std::vector<double> readable_vector;
-//    std::stringstream ss;
-//
-//    ASSERT_NO_THROW({ serialize(writable_vector, ss); });
-//
-//    ASSERT_NO_THROW({ deserialize(readable_vector, ss); });
-//
-//    EXPECT_EQ(writable_vector, readable_vector);
-//}
+TEST(Vector, Double) {
+    const std::vector<double> writable_vector = { 1.1, 2.2, 3.3, 4.4, 5.5, 6.6 };
+    std::vector<double> readable_vector;
+    std::stringstream ss;
+
+    ASSERT_NO_THROW({ serialize(writable_vector, ss); });
+
+    ss >> std::noskipws;
+    ASSERT_NO_THROW({ deserialize(readable_vector, ss); });
+
+    EXPECT_EQ(writable_vector, readable_vector);
+}
 
 
 TEST(Vector, Char) {
@@ -68,22 +72,73 @@ TEST(Vector, Char) {
 
     ASSERT_NO_THROW({ serialize(writable_vector, ss); });
 
+    ss >> std::noskipws;
     ASSERT_NO_THROW({ deserialize(readable_vector, ss); });
 
     EXPECT_EQ(writable_vector, readable_vector);
 }
 
-//TEST(String, _) {
-//    const std::string writable_string("HellowWorld:)");
-//    std::string readable_string;
-//    std::stringstream ss;
-//
-//    std::ofstream ofs("test.ser", std::ofstream::out | std::ofstream::binary);
-//    ASSERT_NO_THROW({ serialize(writable_string, ofs); });
-//    ofs.close();
-//
-//    std::ifstream ifs("test.ser", std::ifstream::in | std::ifstream::binary);
-//    ASSERT_NO_THROW({ deserialize(readable_string, ifs); });
-//
-//    EXPECT_EQ(writable_string, readable_string);
-//}
+TEST(Vector, String) {
+    const std::vector<std::string> writable_vector = { "First", "Second", "Third", "and etc" };
+    std::vector<std::string> readable_vector;
+    std::stringstream ss;
+
+    ASSERT_NO_THROW({ serialize(writable_vector, ss); });
+
+    ss >> std::noskipws;
+    ASSERT_NO_THROW({ deserialize(readable_vector, ss); });
+
+    EXPECT_EQ(writable_vector, readable_vector);
+}
+
+TEST(String, _) {
+    const std::string writable_string("I hate template )<\nIt is joke (;");
+    std::string readable_string;
+    std::stringstream ss;
+
+    ASSERT_NO_THROW({ serialize(writable_string, ss); });
+
+    ss >> std::noskipws;
+    ASSERT_NO_THROW({ deserialize(readable_string, ss); });
+
+    EXPECT_EQ(writable_string, readable_string);
+}
+
+TEST(Map, IntInt) {
+    const std::map<int, int> writable_map = { {1, 456}, {2, 123}, {3, 798} };
+    std::map<int, int> readable_map;
+    std::stringstream ss;
+
+    ASSERT_NO_THROW({ serialize(writable_map, ss); });
+
+    ss >> std::noskipws;
+    ASSERT_NO_THROW({ deserialize(readable_map, ss); });
+
+    EXPECT_EQ(writable_map, readable_map);
+}
+
+TEST(Map, StringInt) {
+    const std::map<std::string, int> writable_map = { {"Count student", 5245}, {"Count teacher", 602}, {"Count deaths", 1} };
+    std::map<std::string, int> readable_map;
+    std::stringstream ss;
+
+    ASSERT_NO_THROW({ serialize(writable_map, ss); });
+
+    ss >> std::noskipws;
+    ASSERT_NO_THROW({ deserialize(readable_map, ss); });
+
+    EXPECT_EQ(writable_map, readable_map);
+}
+
+TEST(Map, StringVector) {
+    const std::map<std::string, std::vector<int>> writable_map = { {"False estimation student", {5, 4, 5, 5}}, {"True estimation student", {3, 3, 3, 2}} };
+    std::map<std::string, std::vector<int>> readable_map;
+    std::stringstream ss;
+
+    ASSERT_NO_THROW({ serialize(writable_map, ss); });
+
+    ss >> std::noskipws;
+    ASSERT_NO_THROW({ deserialize(readable_map, ss); });
+
+    EXPECT_EQ(writable_map, readable_map);
+}

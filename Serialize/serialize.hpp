@@ -8,10 +8,16 @@
 
 
 template <typename T>
-concept Serializable = requires(const T & obj, std::ostream & os, std::istream & is) {
-    { serialize(obj, os) } -> std::same_as<void>;
-    { deserialize(obj, is) } -> std::same_as<void>;
-};
+struct is_std_container : std::false_type {};
+
+template <typename... Args>
+struct is_std_container<std::vector<Args...>> : std::true_type {};
+
+template <typename Key, typename Value, typename... Args>
+struct is_std_container<std::map<Key, Value, Args...>> : std::true_type {};
+
+template <typename CharT, typename Traits, typename Allocator>
+struct is_std_container<std::basic_string<CharT, Traits, Allocator>> : std::true_type {};
 
 
 template <typename T>
@@ -34,21 +40,20 @@ struct deserializer {
 };
 
 
-
+//template <typename T, typename = typename std::enable_if<
+//    std::is_same<decltype(serializer<T>::apply(std::declval<const T&>(), std::declval<std::ostream&>())), void>::value
+//>::type>
 template <typename T>
-//typename std::enable_if<
-//    std::is_same<decltype(serialize(std::declval<T>(), std::declval<std::ostream>())), void>::value
-//>::type
-void serialize(const T& obj, std::ostream& os)
+std::enable_if_t<is_std_container<T>::value | !std::is_class<T>::value, void>
+serialize(const T& obj, std::ostream& os)
 {
     serializer<T>::apply(obj, os);
 }
 
+
 template <typename T>
-//typename std::enable_if<
-//    std::is_same<decltype(serialize(std::declval<T>(), std::declval<std::ostream>())), void>::value
-//>::type
-void deserialize(T& obj, std::istream& is)
+std::enable_if_t<is_std_container<T>::value | !std::is_class<T>::value, void>
+deserialize(T& obj, std::istream& is)
 {
     return deserializer<T>::apply(obj, is);
 }
@@ -66,6 +71,7 @@ struct serializer<std::string> {
         }
     }
 };
+
 
 template <>
 struct deserializer<std::string> {
