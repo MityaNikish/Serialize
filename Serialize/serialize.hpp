@@ -7,17 +7,17 @@
 #include <map>
 
 
-//template <typename T>
-//struct is_std_container : std::false_type {};
-//
-//template <typename... Args>
-//struct is_std_container<std::vector<Args...>> : std::true_type {};
-//
-//template <typename Key, typename Value, typename... Args>
-//struct is_std_container<std::map<Key, Value, Args...>> : std::true_type {};
-//
-//template <typename CharT, typename Traits, typename Allocator>
-//struct is_std_container<std::basic_string<CharT, Traits, Allocator>> : std::true_type {};
+template <typename T>
+struct is_std_container : std::false_type {};
+
+template <typename... Args>
+struct is_std_container<std::vector<Args...>> : std::true_type {};
+
+template <typename Key, typename Value, typename... Args>
+struct is_std_container<std::map<Key, Value, Args...>> : std::true_type {};
+
+template <typename CharT, typename Traits, typename Allocator>
+struct is_std_container<std::basic_string<CharT, Traits, Allocator>> : std::true_type {};
 
 
 template <typename T>
@@ -43,16 +43,14 @@ struct deserializer {
 
 
 template <typename T>
-void serialize(const T& obj, std::ostream& os)
+std::enable_if_t<is_std_container<T>::value || !std::is_class_v<T> || std::is_default_constructible_v<T> && std::is_trivially_copyable_v<T>, void>
+serialize(const T& obj, std::ostream& os)
 {
     serializer<T>::apply(obj, os);
 }
 
-//std::enable_if_t<is_std_container<T>::value | !std::is_class<T>::value, void>
-//std::enable_if_t<std::is_default_constructible<T>::value || std::is_pointer<T>::value, T>
-
 template <typename T>
-std::enable_if_t<std::is_default_constructible<T>::value, T>
+std::enable_if_t<is_std_container<T>::value || !std::is_class_v<T> || std::is_default_constructible_v<T> && std::is_trivially_copyable_v<T>, T>
 deserialize(std::istream& is)
 {
     return deserializer<T>::apply(is);
