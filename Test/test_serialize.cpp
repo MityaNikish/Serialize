@@ -46,7 +46,8 @@ TEST(Vector, Int) {
     ASSERT_NO_THROW({ serialize(writable_vector, ss); });
 
     ss >> std::noskipws;
-    ASSERT_NO_THROW({ deserialize(readable_vector, ss); });
+    
+    ASSERT_NO_THROW({ readable_vector = deserialize<std::vector<int>>(ss); });
 
     EXPECT_EQ(writable_vector, readable_vector);
 }
@@ -59,7 +60,7 @@ TEST(Vector, Double) {
     ASSERT_NO_THROW({ serialize(writable_vector, ss); });
 
     ss >> std::noskipws;
-    ASSERT_NO_THROW({ deserialize(readable_vector, ss); });
+    ASSERT_NO_THROW({ readable_vector = deserialize<std::vector<double>>(ss); });
 
     EXPECT_EQ(writable_vector, readable_vector);
 }
@@ -73,7 +74,7 @@ TEST(Vector, Char) {
     ASSERT_NO_THROW({ serialize(writable_vector, ss); });
 
     ss >> std::noskipws;
-    ASSERT_NO_THROW({ deserialize(readable_vector, ss); });
+    ASSERT_NO_THROW({ readable_vector = deserialize<std::vector<char>>(ss); });
 
     EXPECT_EQ(writable_vector, readable_vector);
 }
@@ -86,7 +87,7 @@ TEST(Vector, String) {
     ASSERT_NO_THROW({ serialize(writable_vector, ss); });
 
     ss >> std::noskipws;
-    ASSERT_NO_THROW({ deserialize(readable_vector, ss); });
+    ASSERT_NO_THROW({ readable_vector = deserialize<std::vector<std::string>>(ss); });
 
     EXPECT_EQ(writable_vector, readable_vector);
 }
@@ -99,7 +100,7 @@ TEST(String, _) {
     ASSERT_NO_THROW({ serialize(writable_string, ss); });
 
     ss >> std::noskipws;
-    ASSERT_NO_THROW({ deserialize(readable_string, ss); });
+    ASSERT_NO_THROW({ readable_string = deserialize<std::string>(ss); });
 
     EXPECT_EQ(writable_string, readable_string);
 }
@@ -109,23 +110,28 @@ TEST(Map, IntInt) {
     std::map<int, int> readable_map;
     std::stringstream ss;
 
+    using type = std::map<int, int>;
+
     ASSERT_NO_THROW({ serialize(writable_map, ss); });
 
     ss >> std::noskipws;
-    ASSERT_NO_THROW({ deserialize(readable_map, ss); });
+    ASSERT_NO_THROW({ readable_map = deserialize<type>(ss); });
 
     EXPECT_EQ(writable_map, readable_map);
 }
+
 
 TEST(Map, StringInt) {
     const std::map<std::string, int> writable_map = { {"Count student", 5245}, {"Count teacher", 602}, {"Count deaths", 1} };
     std::map<std::string, int> readable_map;
     std::stringstream ss;
 
+    using type = std::map<std::string, int>;
+
     ASSERT_NO_THROW({ serialize(writable_map, ss); });
 
     ss >> std::noskipws;
-    ASSERT_NO_THROW({ deserialize(readable_map, ss); });
+    ASSERT_NO_THROW({ readable_map = deserialize<type>(ss); });
 
     EXPECT_EQ(writable_map, readable_map);
 }
@@ -135,10 +141,56 @@ TEST(Map, StringVector) {
     std::map<std::string, std::vector<int>> readable_map;
     std::stringstream ss;
 
+    using type = std::map<std::string, std::vector<int>>;
+
     ASSERT_NO_THROW({ serialize(writable_map, ss); });
 
     ss >> std::noskipws;
-    ASSERT_NO_THROW({ deserialize(readable_map, ss); });
+    ASSERT_NO_THROW({ readable_map = deserialize<type>(ss); });
 
     EXPECT_EQ(writable_map, readable_map);
 }
+
+
+class Container final
+{
+public:
+    Container() = default;
+    Container(int arg) : arg_(arg) {}
+    //int getArg() { return arg_; }
+    //void setArg(const int arg) { arg_ = arg; }
+    //ContainerFirstType& operator=(const ContainerFirstType&) = default;
+	bool operator==(const Container&) const = default;
+private:
+    int arg_;
+};
+
+
+TEST(MyClass, Int) {
+    const Container writable_map(62169549);
+    Container readable_map;
+    std::stringstream ss;
+
+    ASSERT_NO_THROW({ serialize(writable_map, ss); });
+
+    ss >> std::noskipws;
+    ASSERT_NO_THROW({ readable_map = deserialize<Container>(ss); });
+
+    EXPECT_EQ(writable_map, readable_map);
+}
+
+
+//TEST(Heap, Int) {
+//    const std::unordered_map<int, int> writable_map = { {1, 456}, {2, 123}, {3, 798} };
+//    std::unordered_map<int, int> readable_map;
+//    std::stringstream ss;
+//
+//    using type = std::unordered_map<int, int>;
+//
+//    ASSERT_NO_THROW({ serialize(writable_map, ss); });
+//
+//    ss >> std::noskipws;
+//    ASSERT_NO_THROW({ readable_map = deserialize<type>(ss); });
+//
+//    EXPECT_EQ(writable_map, readable_map);
+//}
